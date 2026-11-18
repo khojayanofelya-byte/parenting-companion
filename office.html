@@ -28,6 +28,16 @@
   .scene{position:relative;background:var(--card);border-radius:24px;overflow:hidden;box-shadow:0 1px 2px rgba(22,22,29,.04)}
   .scene svg{display:block;width:100%;height:auto}
   .tag{position:absolute;left:16px;top:14px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.9);font:600 12px/1 ui-monospace,Menlo,Consolas,monospace;color:var(--ink)}
+  .chip.live{display:inline-flex;align-items:center;gap:6px}
+  .chip.live[aria-pressed="true"]{background:#E4F5EC;color:#1F7A55;border-color:#BFE6D0}
+  .chip.live[aria-pressed="true"]::before{content:"";display:none}
+  .legend{position:absolute;right:14px;top:14px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .legend span{padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.92);font-size:12px;font-weight:600;color:var(--ink)}
+  .person{cursor:pointer;transition:transform .7s ease,opacity .4s}
+  .person:focus{outline:none}
+  .puff{animation:puff 2.4s ease-out infinite;opacity:0;transform-box:fill-box;transform-origin:center}
+  .puff.p2{animation-delay:.8s}.puff.p3{animation-delay:1.6s}
+  @keyframes puff{0%{opacity:.0;transform:translate(0,0) scale(.6)}20%{opacity:.7}100%{opacity:0;transform:translate(8px,-34px) scale(1.6)}}
   .desk{cursor:pointer}
   .desk:focus{outline:none}
   .desk:focus-visible .seat,.desk.sel .seat{stroke:var(--accent);stroke-width:3}
@@ -62,13 +72,14 @@
   <div class="top"><a href="./">← Պրոտոտիպ</a></div>
   <div class="eyebrow" style="margin-top:14px">Usage tracker · Parenting Companion</div>
   <h1>Ծնողների օֆիս</h1>
-  <p class="lead" id="lead">12 ծնող օրվա ընթացքում օգտագործում են հավելվածը։ Սեղմիր սեղանի վրա՝ մանրամասների համար։</p>
+  <p class="lead" id="lead">12 ծնող օրվա ընթացքում օգտագործում են հավելվածը, գնում են սուրճի և լանչի, իսկ որոշ հայրեր՝ դուրս ծխելու։ Ժամը live է՝ ինչպես հիմա Երևանում։ Սեղմիր ծնողի վրա՝ մանրամասների համար։</p>
   <span class="demo">● Demo տվյալներ · հորինված ծնողներ, ոչ իրական թեստի արդյունք</span>
 
   <div class="bar" role="group" aria-label="Օր">
     <div id="days" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    <button class="chip live" id="live" type="button" aria-pressed="true">● Live</button>
     <button class="chip play" id="play" type="button">▶ Time-lapse</button>
-    <div class="time"><span>Ժամը</span><input id="t" type="range" min="420" max="1380" step="5" aria-label="Ժամ"><span class="clock" id="clock">--:--</span></div>
+    <div class="time"><span>Ժամը</span><input id="t" type="range" min="0" max="1439" step="1" aria-label="Ժամ"><span class="clock" id="clock">--:--</span></div>
   </div>
 
   <div class="stats">
@@ -79,8 +90,9 @@
   </div>
 
   <div class="scene" id="scene">
-    <svg id="svg" viewBox="0 0 1200 600" role="img" aria-label="Օֆիս՝ 12 ծնողներով"></svg>
+    <svg id="svg" viewBox="0 0 1440 600" role="img" aria-label="Օֆիս՝ 12 ծնողներով, սուրճի անկյուն, լանչի սեղան և դրսում ծխելու տեղ"></svg>
     <div class="tag" id="tag">Երևան · --:--</div>
+    <div class="legend" id="legend"></div>
     <div class="pop" id="pop" role="dialog" aria-live="polite"></div>
   </div>
 
@@ -92,7 +104,7 @@
     <div class="panel">
       <h2>Օրվա ամփոփում</h2>
       <div class="claude" id="summary"></div>
-      <div class="note">Իրական տարբերակում այս ամփոփումը ամեն երեկո գրում է Claude-ը Make-ում՝ Google Sheets-ի տվյալներից, և ուղարկում email-ով։ Այստեղ այն հաշվվում է demo տվյալներից։</div>
+      <div class="note">Իրական տարբերակում այս ամփոփումը աշխատանքային օրերին 21:00-ին գրում է Claude-ը Make-ում և պահում «Office reports»-ում։ Այստեղ այն հաշվվում է demo տվյալներից՝ մինչև ընտրված ժամը։</div>
     </div>
   </div>
 </div>
@@ -100,19 +112,20 @@
 <script>
 /* ---------- Demo data (fictional parents) ---------- */
 const PARENTS = [
-  {n:"Անի Մարգարյան", c:"Արամ, 10", city:"Երևան", col:"#7C5CFA", style:"busy"},
-  {n:"Դավիթ Հակոբյան", c:"Լիլիթ, 12", city:"Երևան", col:"#3FA8D6", style:"evening"},
-  {n:"Նարե Պետրոսյան", c:"Մանե, 9", city:"Գյումրի", col:"#F08A5D", style:"heavy"},
-  {n:"Արմեն Սարգսյան", c:"Տիգրան, 11", city:"Երևան", col:"#3FB57A", style:"light"},
-  {n:"Լուսինե Գրիգորյան", c:"Էրիկ, 10", city:"Վանաձոր", col:"#E0559A", style:"heavy"},
-  {n:"Գոհար Ավետիսյան", c:"Սոնա, 12", city:"Երևան", col:"#5B3FD9", style:"busy"},
-  {n:"Տիգրան Մկրտչյան", c:"Դավիթ, 9", city:"Աբովյան", col:"#2E8C8C", style:"evening"},
-  {n:"Մարիամ Հովհաննիսյան", c:"Անահիտ, 11", city:"Երևան", col:"#C7792B", style:"heavy"},
-  {n:"Վահե Ղազարյան", c:"Նարեկ, 10", city:"Գյումրի", col:"#4A6CF7", style:"light"},
-  {n:"Սիրանուշ Վարդանյան", c:"Էլեն, 9", city:"Երևան", col:"#9B59D0", style:"busy"},
-  {n:"Հայկ Կարապետյան", c:"Մարկ, 12", city:"Կապան", col:"#D0493F", style:"evening"},
-  {n:"Աննա Մելքոնյան", c:"Լևոն, 11", city:"Երևան", col:"#1F7A55", style:"heavy"}
+  {n:"Անի Մարգարյան", c:"Արամ, 10", city:"Երևան", col:"#7C5CFA", style:"busy", items:["photo","cactus"]},
+  {n:"Դավիթ Հակոբյան", c:"Լիլիթ, 12", city:"Երևան", col:"#3FA8D6", style:"evening", dad:true, items:["mug","books"]},
+  {n:"Նարե Պետրոսյան", c:"Մանե, 9", city:"Գյումրի", col:"#F08A5D", style:"heavy", items:["plant","photo"]},
+  {n:"Արմեն Սարգսյան", c:"Տիգրան, 11", city:"Երևան", col:"#3FB57A", style:"light", dad:true, items:["mug","lamp"]},
+  {n:"Լուսինե Գրիգորյան", c:"Էրիկ, 10", city:"Վանաձոր", col:"#E0559A", style:"heavy", items:["drawing","cactus"]},
+  {n:"Գոհար Ավետիսյան", c:"Սոնա, 12", city:"Երևան", col:"#5B3FD9", style:"busy", items:["flowers","mug"]},
+  {n:"Տիգրան Մկրտչյան", c:"Դավիթ, 9", city:"Աբովյան", col:"#2E8C8C", style:"evening", dad:true, items:["ball","photo"]},
+  {n:"Մարիամ Հովհաննիսյան", c:"Անահիտ, 11", city:"Երևան", col:"#C7792B", style:"heavy", items:["books","plant"]},
+  {n:"Վահե Ղազարյան", c:"Նարեկ, 10", city:"Գյումրի", col:"#4A6CF7", style:"light", dad:true, items:["mug","pens"]},
+  {n:"Սիրանուշ Վարդանյան", c:"Էլեն, 9", city:"Երևան", col:"#9B59D0", style:"busy", items:["photo","flowers"]},
+  {n:"Հայկ Կարապետյան", c:"Մարկ, 12", city:"Կապան", col:"#D0493F", style:"evening", dad:true, items:["lamp","cactus"]},
+  {n:"Աննա Մելքոնյան", c:"Լևոն, 11", city:"Երևան", col:"#1F7A55", style:"heavy", items:["drawing","mug"]}
 ];
+const ITEM_NAMES={photo:"երեխայի նկարը",cactus:"կակտուս",mug:"սուրճի բաժակ",books:"գրքեր",plant:"բույս",lamp:"սեղանի լամպ",drawing:"երեխայի նկարածը",flowers:"ծաղիկներ",ball:"ֆուտբոլի գնդակ",pens:"գրիչների բաժակ"};
 const ACTIONS = [
   {s:"Այսօր", a:"Ստուգեց երեխայի օրը", k:"check", w:5},
   {s:"Նոր առաջադրանք", a:"Ավելացրեց առաջադրանք", k:"task", w:3},
@@ -124,106 +137,176 @@ const ACTIONS = [
   {s:"Ներմուծում", a:"Ներմուծեց դասացուցակը", k:"plan", w:1},
   {s:"Չեմ կարող", a:"Պատասխանեց «Չեմ կարող»-ին", k:"reply", w:1}
 ];
-const DAYS = [
-  {id:"2026-11-12", label:"Հնգ, 12 նոյ."},
-  {id:"2026-11-13", label:"Ուրբ, 13 նոյ."},
-  {id:"2026-11-16", label:"Երկ, 16 նոյ."},
-  {id:"2026-11-17", label:"Երք, 17 նոյ."},
-  {id:"2026-11-18", label:"Չրք, 18 նոյ."}
-];
-function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
-function pick(r){const tot=ACTIONS.reduce((a,b)=>a+b.w,0);let x=r()*tot;for(const a of ACTIONS){if((x-=a.w)<0)return a}return ACTIONS[0]}
 const WINDOWS = {
   busy:[[480,540],[720,780],[1080,1260]],
   evening:[[1020,1320]],
   heavy:[[450,540],[780,900],[1020,1290]],
   light:[[510,560],[1140,1230]]
 };
-// sessions[day][parent] = [{start,end,act}]
-const DATA = {};
-DAYS.forEach((d,di)=>{
-  DATA[d.id] = PARENTS.map((p,pi)=>{
-    const r = rng((di+1)*1000+pi*37+7);
-    const out=[];
+
+/* ---------- Yerevan time ---------- */
+const TZ="Asia/Yerevan";
+const WD=["Կիր","Երկ","Երք","Չրք","Հնգ","Ուրբ","Շբթ"];
+const MO=["հուն.","փետ.","մարտ","ապր.","մայ.","հուն.","հուլ.","օգ.","սեպ.","հոկ.","նոյ.","դեկ."];
+function yerevanNow(){
+  const p={};new Intl.DateTimeFormat("en-GB",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(new Date()).forEach(x=>p[x.type]=x.value);
+  return {date:`${p.year}-${p.month}-${p.day}`,min:(+p.hour)*60+(+p.minute),sec:+p.second};
+}
+function buildDays(today){
+  const out=[];const d=new Date(today+"T12:00:00Z");
+  out.push(new Date(d));
+  while(out.length<5){d.setUTCDate(d.getUTCDate()-1);const w=d.getUTCDay();if(w!==0&&w!==6)out.push(new Date(d));}
+  return out.reverse().map(x=>({id:x.toISOString().slice(0,10),label:`${WD[x.getUTCDay()]}, ${x.getUTCDate()} ${MO[x.getUTCMonth()]}`}));
+}
+const NOW=yerevanNow();
+const TODAY=NOW.date;
+const DAYS=buildDays(TODAY);
+
+/* ---------- Generated sessions and breaks ---------- */
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+function hash(str){let h=2166136261;for(const ch of str){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function pick(r){const tot=ACTIONS.reduce((a,b)=>a+b.w,0);let x=r()*tot;for(const a of ACTIONS){if((x-=a.w)<0)return a}return ACTIONS[0]}
+const DATA={}, BREAKS={};
+function gen(day){
+  if(DATA[day])return;
+  const H=hash(day);
+  DATA[day]=PARENTS.map((p,pi)=>{
+    const r=rng(H+pi*37+7);const out=[];
     for(const [a,b] of WINDOWS[p.style]){
       let t=a+Math.floor(r()*20);
-      while(t<b-10){
-        const len=8+Math.floor(r()*(p.style==="heavy"?34:24));
-        out.push({start:t,end:Math.min(t+len,b),act:pick(r)});
-        t+=len+6+Math.floor(r()*28);
-      }
+      while(t<b-10){const len=8+Math.floor(r()*(p.style==="heavy"?34:24));out.push({start:t,end:Math.min(t+len,b),act:pick(r)});t+=len+6+Math.floor(r()*28);}
     }
     return out;
   });
-});
+  BREAKS[day]=PARENTS.map((p,pi)=>{
+    const r=rng(H+pi*91+3);const b=[];
+    const ls=780+(pi%3)*12+Math.floor(r()*6);b.push({start:ls,end:ls+38+Math.floor(r()*14),type:"lunch"});
+    const cs=pi%2===0?650+Math.floor(r()*30):950+Math.floor(r()*30);b.push({start:cs,end:cs+12,type:"coffee"});
+    if(r()<0.5){const c2=1035+Math.floor(r()*25);b.push({start:c2,end:c2+10,type:"coffee"});}
+    if(p.dad){[615,735,890,1050,1185].forEach(t0=>{if(r()<0.72){const s=t0+Math.floor(r()*22);b.push({start:s,end:s+8,type:"smoke"});}});}
+    return b;
+  });
+}
 
 /* ---------- Helpers ---------- */
 const $=id=>document.getElementById(id);
 const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+":"+String(m%60).padStart(2,'0');
 const dur=m=>{const h=Math.floor(m/60),mm=Math.round(m%60);return h?`${h} ժ ${mm} ր`:`${mm} ր`};
 const initials=n=>n.split(" ").map(x=>x[0]).join("");
-let day=DAYS[DAYS.length-1].id, T=20*60+30, sel=-1, timer=null;
+const first=n=>n.split(" ")[0];
+let day=TODAY, T=NOW.min, live=true, sel=-1, timer=null;
+DAYS.forEach(d=>gen(d.id));
 
 /* ---------- Scene ---------- */
 const NS="http://www.w3.org/2000/svg";
 const el=(t,a={},p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const txt=(p,x,y,s,a={})=>{const e=el("text",Object.assign({x,y,"text-anchor":"middle",fill:"#16161D","font-size":13,"font-weight":600},a),p);e.textContent=s;return e};
 const svg=$("svg");
-const sky=el("linearGradient",{id:"sky",x1:0,y1:0,x2:0,y2:1},el("defs",{},svg));
+const defs=el("defs",{},svg);
+const sky=el("linearGradient",{id:"sky",x1:0,y1:0,x2:0,y2:1},defs);
 const sk1=el("stop",{offset:"0"},sky), sk2=el("stop",{offset:"1"},sky);
-// wall + floor
-const wall=el("rect",{x:0,y:0,width:1200,height:230,fill:"#EEEAFB"},svg);
-el("rect",{x:0,y:230,width:1200,height:370,fill:"#F3F1F7"},svg);
-for(let i=0;i<12;i++) el("line",{x1:i*110-60,y1:600,x2:i*100+40,y2:230,stroke:"#E6E3EE","stroke-width":2},svg);
-// windows
-const wins=[];
-[120,430,740].forEach(x=>{
+
+// indoor
+const wall=el("rect",{x:0,y:0,width:1210,height:230,fill:"#EEEAFB"},svg);
+el("rect",{x:0,y:230,width:1210,height:370,fill:"#F3F1F7"},svg);
+for(let i=0;i<13;i++) el("line",{x1:i*110-60,y1:600,x2:i*100+40,y2:230,stroke:"#E6E3EE","stroke-width":2},svg);
+[110,400,690].forEach(x=>{
   el("rect",{x:x-6,y:34,width:232,height:148,rx:12,fill:"#FFFFFF"},svg);
-  wins.push(el("rect",{x,y:40,width:220,height:136,rx:8,fill:"url(#sky)"},svg));
+  el("rect",{x,y:40,width:220,height:136,rx:8,fill:"url(#sky)"},svg);
   el("line",{x1:x+110,y1:40,x2:x+110,y2:176,stroke:"#FFFFFF","stroke-width":5},svg);
 });
 const sun=el("circle",{r:16,fill:"#FFD66B"},svg);
-// sign + coffee corner
-el("rect",{x:990,y:40,width:170,height:52,rx:12,fill:"#16161D"},svg);
-const signTxt=el("text",{x:1075,y:72,"text-anchor":"middle",fill:"#fff","font-size":15,"font-weight":700},svg);signTxt.textContent="Parenting Companion";
-el("rect",{x:1010,y:150,width:150,height:70,rx:10,fill:"#D9D3F5"},svg);
-const cof=el("text",{x:1085,y:192,"text-anchor":"middle",fill:"#5B3FD9","font-size":14,"font-weight":600},svg);cof.textContent="☕ Սուրճ";
-const coffeeGroup=el("g",{},svg);
+// wall clock
+el("circle",{cx:960,cy:70,r:30,fill:"#FFFFFF",stroke:"#16161D","stroke-width":3},svg);
+const hHand=el("line",{x1:960,y1:70,x2:960,y2:52,stroke:"#16161D","stroke-width":4,"stroke-linecap":"round"},svg);
+const mHand=el("line",{x1:960,y1:70,x2:960,y2:46,stroke:"#7C5CFA","stroke-width":3,"stroke-linecap":"round"},svg);
+// sign
+el("rect",{x:1020,y:40,width:170,height:52,rx:12,fill:"#16161D"},svg);
+txt(svg,1105,72,"Parenting Companion",{fill:"#fff","font-size":15,"font-weight":700});
+// coffee corner
+el("rect",{x:1030,y:140,width:160,height:78,rx:10,fill:"#D9D3F5"},svg);
+el("rect",{x:1048,y:152,width:34,height:44,rx:6,fill:"#16161D"},svg);
+el("rect",{x:1055,y:160,width:20,height:12,rx:3,fill:"#7C5CFA"},svg);
+el("rect",{x:1098,y:172,width:16,height:20,rx:3,fill:"#FFFFFF"},svg);el("rect",{x:1120,y:172,width:16,height:20,rx:3,fill:"#FFFFFF"},svg);
+txt(svg,1150,210,"☕ Սուրճ",{fill:"#5B3FD9","font-size":13});
+// lunch table
+el("rect",{x:975,y:345,width:220,height:52,rx:16,fill:"#FFFFFF",stroke:"#E3E0EC","stroke-width":2},svg);
+for(let k=0;k<5;k++){el("circle",{cx:1003+k*41,cy:371,r:11,fill:"#FDEEE5",stroke:"#F3D2BF"},svg);}
+txt(svg,1085,420,"🍽 Լանչ",{fill:"#9A4A22","font-size":13});
+// outside
+el("rect",{x:1215,y:0,width:225,height:600,fill:"url(#sky)"},svg);
+const grass=el("rect",{x:1215,y:430,width:225,height:170,fill:"#BFE3C8"},svg);
+el("rect",{x:1205,y:0,width:12,height:600,fill:"#D8D3EA"},svg);
+el("rect",{x:1203,y:330,width:16,height:110,rx:3,fill:"#FFFFFF",stroke:"#D8D3EA"},svg);
+txt(svg,1211,322,"Ելք",{"font-size":11,fill:"#6E6E7A"});
+// tree
+el("rect",{x:1400,y:330,width:12,height:100,fill:"#8A6A4A"},svg);
+el("circle",{cx:1406,cy:320,r:34,fill:"#7FC08F"},svg);
+// bench, ashtray, sign
+el("rect",{x:1240,y:478,width:120,height:10,rx:4,fill:"#B98A5E"},svg);
+el("rect",{x:1248,y:488,width:6,height:22,fill:"#8A6A4A"},svg);el("rect",{x:1346,y:488,width:6,height:22,fill:"#8A6A4A"},svg);
+el("rect",{x:1380,y:440,width:8,height:46,fill:"#6E6E7A"},svg);el("ellipse",{cx:1384,cy:440,rx:14,ry:5,fill:"#4A4A55"},svg);
+el("rect",{x:1232,y:250,width:150,height:34,rx:10,fill:"rgba(255,255,255,.9)"},svg);
+txt(svg,1307,272,"🚬 Ծխելու տեղ",{"font-size":13});
+const outsideLabel=el("g",{},svg);
 
-// desks
-const deskG=[];
-const COLS=4, pos=[];
-for(let r=0;r<3;r++)for(let c=0;c<COLS;c++){
-  const s=0.82+r*0.1, x=150+c*235+(r%2?40:0), y=268+r*112;
-  pos.push({x,y,s});
+/* desk items */
+function drawItem(g,type,x,y){
+  switch(type){
+    case "photo": el("rect",{x:x-9,y:y-20,width:18,height:20,rx:2,fill:"#C7792B"},g);el("rect",{x:x-6,y:y-17,width:12,height:13,fill:"#BFE3F2"},g);el("circle",{cx:x-2,cy:y-12,r:2.4,fill:"#F2D3BD"},g);el("circle",{cx:x+3,cy:y-11,r:2,fill:"#F2D3BD"},g);break;
+    case "cactus": el("rect",{x:x-7,y:y-8,width:14,height:8,rx:2,fill:"#D0493F"},g);el("rect",{x:x-3.5,y:y-26,width:7,height:19,rx:3.5,fill:"#3FB57A"},g);el("rect",{x:x-9,y:y-20,width:5,height:9,rx:2.5,fill:"#3FB57A"},g);el("rect",{x:x+4,y:y-23,width:5,height:9,rx:2.5,fill:"#3FB57A"},g);break;
+    case "mug": el("rect",{x:x-6,y:y-13,width:12,height:13,rx:2,fill:"#FFFFFF",stroke:"#16161D","stroke-width":1.5},g);el("path",{d:`M${x+6} ${y-10} q6 0 6 4 q0 4 -6 4`,fill:"none",stroke:"#16161D","stroke-width":1.5},g);el("path",{d:`M${x-2} ${y-17} q2 -4 0 -7 M${x+2} ${y-17} q2 -4 0 -7`,fill:"none",stroke:"#C9C6D6","stroke-width":1.4},g);break;
+    case "books": el("rect",{x:x-11,y:y-6,width:22,height:6,fill:"#7C5CFA"},g);el("rect",{x:x-9,y:y-12,width:19,height:6,fill:"#F08A5D"},g);el("rect",{x:x-10,y:y-17,width:18,height:5,fill:"#3FA8D6"},g);break;
+    case "plant": el("rect",{x:x-6,y:y-9,width:12,height:9,rx:2,fill:"#C7792B"},g);el("ellipse",{cx:x-5,cy:y-15,rx:5,ry:8,fill:"#2E8C8C",transform:`rotate(-25 ${x-5} ${y-15})`},g);el("ellipse",{cx:x+5,cy:y-15,rx:5,ry:8,fill:"#3FB57A",transform:`rotate(25 ${x+5} ${y-15})`},g);break;
+    case "lamp": el("rect",{x:x-7,y:y-3,width:14,height:3,fill:"#16161D"},g);el("line",{x1:x,y1:y-3,x2:x+4,y2:y-20,stroke:"#16161D","stroke-width":2},g);el("path",{d:`M${x-4} ${y-20} l14 -4 l-2 9z`,fill:"#FFD66B"},g);break;
+    case "drawing": el("rect",{x:x-11,y:y-18,width:22,height:18,rx:1,fill:"#FFFFFF",stroke:"#E3E0EC"},g);el("circle",{cx:x+5,cy:y-13,r:3,fill:"#FFD66B"},g);el("path",{d:`M${x-8} ${y-3} l5 -7 l4 4 l3 -3 l4 6z`,fill:"#3FB57A"},g);el("path",{d:`M${x-8} ${y-14} h4 v4 h-4z`,fill:"#E0559A"},g);break;
+    case "flowers": el("rect",{x:x-4,y:y-10,width:8,height:10,rx:2,fill:"#BFE3F2"},g);[[-5,-18,"#E0559A"],[0,-22,"#FFD66B"],[5,-18,"#F08A5D"]].forEach(([dx,dy,c])=>{el("line",{x1:x,y1:y-10,x2:x+dx,y2:y+dy,stroke:"#3FB57A","stroke-width":1.5},g);el("circle",{cx:x+dx,cy:y+dy,r:3.2,fill:c},g)});break;
+    case "ball": el("circle",{cx:x,cy:y-8,r:8,fill:"#FFFFFF",stroke:"#16161D","stroke-width":1.2},g);el("path",{d:`M${x} ${y-12} l3 2 l-1 3.5 h-4 l-1 -3.5z`,fill:"#16161D"},g);break;
+    case "pens": el("rect",{x:x-6,y:y-12,width:12,height:12,rx:2,fill:"#4A6CF7"},g);el("line",{x1:x-3,y1:y-12,x2:x-5,y2:y-22,stroke:"#D0493F","stroke-width":2},g);el("line",{x1:x+1,y1:y-12,x2:x+1,y2:y-23,stroke:"#16161D","stroke-width":2},g);el("line",{x1:x+4,y1:y-12,x2:x+7,y2:y-21,stroke:"#3FB57A","stroke-width":2},g);break;
+  }
 }
+
+/* desks */
+const pos=[];
+for(let r=0;r<3;r++)for(let c=0;c<4;c++){const s=0.82+r*0.1;pos.push({x:130+c*225+(r%2?40:0),y:268+r*112,s});}
+const deskLayer=el("g",{},svg);
+const personLayer=el("g",{},svg);
+const deskG=[], people=[];
 PARENTS.forEach((p,i)=>{
   const {x,y,s}=pos[i];
-  const g=el("g",{class:"desk",tabindex:0,role:"button","aria-label":p.n,transform:`translate(${x} ${y}) scale(${s})`},svg);
-  // chair
-  el("rect",{x:-22,y:-6,width:44,height:46,rx:12,fill:"#D8D5E3",class:"seat",stroke:"none"},g);
-  // person
-  const person=el("g",{},g);
-  el("rect",{x:-20,y:-8,width:40,height:44,rx:16,fill:p.col},person);
-  el("circle",{cx:0,cy:-26,r:17,fill:"#F2D3BD"},person);
-  el("path",{d:"M-17 -30 a17 17 0 0 1 34 0 q-17 -9 -34 0z",fill:"#3A2E2A"},person);
-  const ini=el("text",{x:0,y:20,"text-anchor":"middle",fill:"#fff","font-size":12,"font-weight":700},person);ini.textContent=initials(p.n);
-  // desk
+  const g=el("g",{class:"desk",transform:`translate(${x} ${y}) scale(${s})`},deskLayer);
+  el("rect",{x:-22,y:-6,width:44,height:46,rx:12,fill:"#D8D5E3",class:"seat"},g);
   el("rect",{x:-62,y:30,width:124,height:18,rx:6,fill:"#FFFFFF",stroke:"#E3E0EC"},g);
   el("rect",{x:-56,y:48,width:8,height:30,fill:"#D8D5E3"},g);el("rect",{x:48,y:48,width:8,height:30,fill:"#D8D5E3"},g);
-  // phone
-  const glow=el("rect",{x:20,y:4,width:30,height:30,rx:9,fill:"#7C5CFA",opacity:0},g);
-  const phone=el("rect",{x:27,y:8,width:16,height:26,rx:4,fill:"#16161D"},g);
-  const scr=el("rect",{x:29,y:11,width:12,height:19,rx:2,fill:"#3A3A46"},g);
-  // name
-  const nm=el("text",{x:0,y:96,"text-anchor":"middle",fill:"#16161D","font-size":13,"font-weight":600},g);nm.textContent=p.n.split(" ")[0];
-  // bubble
-  const bub=el("g",{opacity:0},g);
+  drawItem(g,p.items[0],-44,31);drawItem(g,p.items[1],-24,31);
+  txt(g,0,96,first(p.n));
+  g.addEventListener("click",()=>select(i));
+  deskG.push(g);
+
+  // person (moves around)
+  const pg=el("g",{class:"person",tabindex:0,role:"button","aria-label":p.n},personLayer);
+  const body=el("g",{},pg);
+  el("rect",{x:-20,y:-8,width:40,height:44,rx:16,fill:p.col},body);
+  el("circle",{cx:0,cy:-26,r:17,fill:"#F2D3BD"},body);
+  el("path",{d:p.dad?"M-17 -32 a17 17 0 0 1 34 0 q-17 -5 -34 0z":"M-18 -28 a18 18 0 0 1 36 0 l0 10 q-4 -14 -18 -14 q-14 0 -18 14z",fill:"#3A2E2A"},body);
+  txt(body,0,20,initials(p.n),{fill:"#fff","font-size":12,"font-weight":700});
+  const glow=el("rect",{x:20,y:4,width:30,height:30,rx:9,fill:"#7C5CFA",opacity:0},pg);
+  el("rect",{x:27,y:8,width:16,height:26,rx:4,fill:"#16161D"},pg);
+  const scr=el("rect",{x:29,y:11,width:12,height:19,rx:2,fill:"#3A3A46"},pg);
+  // cigarette + smoke
+  const cig=el("g",{opacity:0},pg);
+  el("line",{x1:-26,y1:6,x2:-40,y2:2,stroke:"#FFFFFF","stroke-width":3.5,"stroke-linecap":"round"},cig);
+  el("circle",{cx:-41,cy:2,r:2.2,fill:"#F08A5D"},cig);
+  ["","p2","p3"].forEach(c=>el("circle",{cx:-42,cy:-4,r:4,fill:"#D8D5E3",class:"puff "+c},cig));
+  // name under person when away from desk
+  const tag=txt(pg,0,56,first(p.n),{opacity:0,"font-size":12});
+  const bub=el("g",{opacity:0},pg);
   const bb=el("rect",{x:-80,y:-92,width:160,height:34,rx:12,fill:"#FFFFFF",stroke:"#ECECF2"},bub);
   el("path",{d:"M-6 -58 l6 9 l6 -9z",fill:"#FFFFFF"},bub);
-  const bt=el("text",{x:0,y:-70,"text-anchor":"middle",fill:"#16161D","font-size":12,"font-weight":600},bub);
-  g.addEventListener("click",()=>select(i));
-  g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(i)}});
-  deskG.push({g,person,glow,scr,bub,bt,bb});
+  const bt=txt(bub,0,-70,"",{"font-size":12});
+  pg.addEventListener("click",()=>select(i));
+  pg.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(i)}});
+  people.push({pg,glow,scr,cig,tag,bub,bb,bt});
 });
 
 /* ---------- State ---------- */
@@ -232,44 +315,64 @@ function stateAt(pi,t){
   const cur=ss.find(s=>t>=s.start&&t<s.end);
   const done=ss.filter(s=>s.start<t);
   const minutes=done.reduce((a,s)=>a+Math.min(s.end,t)-s.start,0);
-  const last=done[done.length-1];
-  return {cur,done,minutes,last};
+  const brk=BREAKS[day][pi].find(b=>t>=b.start&&t<b.end);
+  const order={smoke:3,lunch:2,coffee:1};
+  const where=brk?brk.type:"desk";
+  return {cur,done,minutes,where};
 }
+const WHERE={desk:"սեղանի մոտ",coffee:"սուրճ է խմում",lunch:"լանչի է",smoke:"դրսում ծխում է",away:"օֆիսում չէ"};
 function skyColors(t){
   const h=t/60;
-  if(h<7.5||h>=18.5) return ["#1E2246","#3B3F7A",true];
+  if(h<7||h>=18.5) return ["#1E2246","#3B3F7A",true];
   if(h<9) return ["#F7C6A3","#BFD9F2",false];
   if(h>=17) return ["#F2A27A","#8E8BD6",false];
   return ["#8CCDF0","#DDF0FB",false];
 }
+function isToday(){return day===TODAY}
 function render(){
   $("clock").textContent=fmt(T);$("t").value=T;
   const [a,b,night]=skyColors(T);sk1.setAttribute("stop-color",a);sk2.setAttribute("stop-color",b);
-  wall.setAttribute("fill",night?"#DCD8EE":"#EEEAFB");
+  wall.setAttribute("fill",night?"#DCD8EE":"#EEEAFB");grass.setAttribute("fill",night?"#5E7A6A":"#BFE3C8");
   const prog=Math.min(Math.max((T-420)/(1140-420),0),1);
-  sun.setAttribute("cx",130+prog*820);sun.setAttribute("cy",150-Math.sin(prog*Math.PI)*95);
-  sun.setAttribute("fill",night?"#E8E6F7":"#FFD66B");
-  $("tag").textContent=`Երևան ${fmt(T)} · ${night?"երեկո":"օր"}`;
-  let now=0,tasks=0,praise=0,totalMin=0;
-  coffeeGroup.innerHTML="";let coffeeN=0;
+  sun.setAttribute("cx",120+prog*780);sun.setAttribute("cy",150-Math.sin(prog*Math.PI)*95);sun.setAttribute("fill",night?"#E8E6F7":"#FFD66B");
+  const hr=(T/60)%12, mn=T%60;
+  hHand.setAttribute("transform",`rotate(${hr*30} 960 70)`);mHand.setAttribute("transform",`rotate(${mn*6} 960 70)`);
+  $("tag").textContent=`Երևան ${fmt(T)} · ${night?"երեկո":"օր"}${live&&isToday()?" · live":""}`;
+  let now=0,tasks=0,praise=0,totalMin=0;const counts={coffee:0,lunch:0,smoke:0,away:0};
+  const slot={coffee:0,lunch:0,smoke:0};
   PARENTS.forEach((p,i)=>{
-    const st=stateAt(i,T), d=deskG[i];
+    const st=stateAt(i,T), P=people[i];
     totalMin+=st.minutes;
     st.done.forEach(s=>{if(s.act.k==="task")tasks++;if(s.act.k==="praise"||s.act.k==="reply")praise++;});
-    const away = !st.cur && (T<480||T>1320||(T>=780&&T<840&&i%3===0));
-    d.person.setAttribute("opacity",away?0:1);
-    if(away&&coffeeN<4&&T>=780&&T<840){const c=el("circle",{cx:1040+coffeeN*30,cy:250,r:11,fill:p.col},coffeeGroup);coffeeN++;}
-    if(st.cur){now++;d.glow.setAttribute("opacity",1);d.glow.classList.add("glow");d.scr.setAttribute("fill","#ECE8FD");
-      d.bt.textContent=st.cur.act.a;const w=Math.max(120,st.cur.act.a.length*7.2+24);d.bb.setAttribute("width",w);d.bb.setAttribute("x",-w/2);d.bub.setAttribute("opacity",1);}
-    else{d.glow.setAttribute("opacity",0);d.glow.classList.remove("glow");d.scr.setAttribute("fill","#3A3A46");d.bub.setAttribute("opacity",0);}
-    d.g.classList.toggle("sel",i===sel);
+    let where=st.where;
+    const inOffice=T>=470+i*3&&T<1320;
+    if(!inOffice&&!st.cur) where="away";
+    if(where!=="desk"&&where!=="away")counts[where]++;
+    if(where==="away")counts.away++;
+    let x,y,s;
+    if(where==="coffee"){const k=slot.coffee++;x=1045+(k%4)*48;y=268;s=0.75;}
+    else if(where==="lunch"){const k=slot.lunch++;x=1003+(k%5)*41;y=k<5?322:440;s=0.72;}
+    else if(where==="smoke"){const k=slot.smoke++;x=1250+(k%3)*58;y=k<3?440:540;s=0.8;}
+    else {({x,y,s}=pos[i]);}
+    P.pg.style.transform=`translate(${x}px,${y}px) scale(${s})`;
+    P.pg.style.opacity=where==="away"?0:1;
+    P.pg.style.pointerEvents=where==="away"?"none":"auto";
+    P.cig.setAttribute("opacity",where==="smoke"?1:0);
+    P.tag.setAttribute("opacity",(where==="smoke"||where==="coffee")?1:0);
+    if(st.cur){now++;P.glow.setAttribute("opacity",1);P.glow.classList.add("glow");P.scr.setAttribute("fill","#ECE8FD");
+      P.bt.textContent=st.cur.act.a;const w=Math.max(120,st.cur.act.a.length*7.2+24);P.bb.setAttribute("width",w);P.bb.setAttribute("x",-w/2);P.bub.setAttribute("opacity",1);}
+    else{P.glow.setAttribute("opacity",0);P.glow.classList.remove("glow");P.scr.setAttribute("fill","#3A3A46");P.bub.setAttribute("opacity",0);}
+    deskG[i].classList.toggle("sel",i===sel);
+    P.where=where;
   });
   $("sNow").textContent=`${now} / ${PARENTS.length}`;
   $("sAvg").textContent=dur(totalMin/PARENTS.length);
   $("sTasks").textContent=tasks;$("sPraise").textContent=praise;
+  $("legend").innerHTML=`<span>☕ սուրճ՝ ${counts.coffee}</span><span>🍽 լանչ՝ ${counts.lunch}</span><span>🚬 դրսում՝ ${counts.smoke}</span>`;
   renderPeople();renderSummary();if(sel>=0)renderPop();
 }
-function weekMinutes(pi){return DAYS.map(d=>DATA[d.id][pi].reduce((a,s)=>a+s.end-s.start,0))}
+function weekMinutes(pi){return DAYS.map(d=>DATA[d.id][pi].reduce((a,s)=>a+(d.id===TODAY?Math.max(0,Math.min(s.end,NOWMIN())-s.start):s.end-s.start),0))}
+function NOWMIN(){return yerevanNow().min}
 function spark(vals,col){
   const w=70,h=24,max=Math.max(...vals,1);
   const pts=vals.map((v,i)=>`${(i/(vals.length-1))*w},${h-2-(v/max)*(h-4)}`).join(" ");
@@ -277,51 +380,67 @@ function spark(vals,col){
 }
 function renderPeople(){
   $("people").innerHTML=PARENTS.map((p,i)=>{
-    const st=stateAt(i,T);
-    return `<button class="p" type="button" data-i="${i}"><span class="av" style="background:${p.col}">${initials(p.n)}</span><span><span class="n">${p.n}</span><br><span class="m">${p.c} · ${p.city} · ${dur(st.minutes)}${st.cur?" · <b style='color:#5B3FD9'>հիմա</b>":""}</span></span>${spark(weekMinutes(i),p.col)}</button>`;
+    const st=stateAt(i,T), w=people[i].where;
+    const status=st.cur?"<b style='color:#5B3FD9'>հավելվածում</b>":(w!=="desk"?WHERE[w]:"");
+    return `<button class="p" type="button" data-i="${i}"><span class="av" style="background:${p.col}">${initials(p.n)}</span><span><span class="n">${p.n}</span><br><span class="m">${p.c} · ${p.city} · ${dur(st.minutes)}${status?" · "+status:""}</span></span>${spark(weekMinutes(i),p.col)}</button>`;
   }).join("");
   $("people").querySelectorAll(".p").forEach(b=>b.onclick=()=>{select(+b.dataset.i);$("scene").scrollIntoView({behavior:"smooth",block:"center"})});
 }
 function renderSummary(){
-  const end=1380, mins=PARENTS.map((p,i)=>DATA[day][i].reduce((a,s)=>a+s.end-s.start,0));
+  const mins=PARENTS.map((p,i)=>stateAt(i,T).minutes);
   const avg=mins.reduce((a,b)=>a+b,0)/mins.length;
+  const done=DATA[day].flat().filter(s=>s.start<T);
+  if(!done.length){$("summary").innerHTML=`<p>Մինչև ${fmt(T)} ծնողներից ոչ մեկը դեռ չի բացել հավելվածը։ Օրը սովորաբար սկսվում է 07:30-ից հետո։</p>`;return}
   const top=mins.indexOf(Math.max(...mins)), low=mins.indexOf(Math.min(...mins));
-  const counts={};DATA[day].flat().forEach(s=>counts[s.act.s]=(counts[s.act.s]||0)+1);
+  const counts={};done.forEach(s=>counts[s.act.s]=(counts[s.act.s]||0)+1);
   const topScreen=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
-  const evening=DATA[day].flat().filter(s=>s.start>=1020).length/DATA[day].flat().length;
-  const regions=PARENTS.filter(p=>p.city!=="Երևան").length;
-  $("summary").innerHTML=`<p><b>Միջինը ${dur(avg)}</b> մեկ ծնողին. ամենաշատը՝ ${PARENTS[top].n.split(" ")[0]} (${dur(mins[top])}), ամենաքիչը՝ ${PARENTS[low].n.split(" ")[0]} (${dur(mins[low])})։</p>
-  <p>Ամենաշատ բացված էկրանը՝ <b>«${topScreen}»</b>։ Սեսիաների ${Math.round(evening*100)}%-ը երեկոյան է՝ 17:00-ից հետո, երբ երեխաները տանն են։</p>
-  <p>Հաջորդ քայլ՝ ստուգել ${PARENTS[low].n.split(" ")[0]}-ին. նա քիչ է բացում, միգուցե ծանուցումները չեն աշխատում։ ${regions} ծնող մարզերից է։</p>`;
+  const evening=done.filter(s=>s.start>=1020).length/done.length;
+  const smokes=BREAKS[day].flat().filter(b=>b.type==="smoke"&&b.start<T).length;
+  $("summary").innerHTML=`<p>Մինչև <b>${fmt(T)}</b>՝ միջինը <b>${dur(avg)}</b> մեկ ծնողին. ամենաշատը՝ ${first(PARENTS[top].n)} (${dur(mins[top])}), ամենաքիչը՝ ${first(PARENTS[low].n)} (${dur(mins[low])})։</p>
+  <p>Ամենաշատ բացված էկրանը՝ <b>«${topScreen}»</b>։ Սեսիաների ${Math.round(evening*100)}%-ը 17:00-ից հետո է։ Այսօր հայրերը դուրս են եկել ծխելու ${smokes} անգամ. ընդմիջումներին էլ են հաճախ ստուգում հավելվածը։</p>
+  <p>Հաջորդ քայլ՝ զանգահարել ${first(PARENTS[low].n)}-ին և հարցնել, թե ինչու է քիչ բացում։</p>`;
 }
 function select(i){sel=(sel===i?-1:i);render();if(sel<0)$("pop").style.display="none"}
 function renderPop(){
-  const p=PARENTS[sel], st=stateAt(sel,T), pop=$("pop"), {x,y}=pos[sel];
+  const p=PARENTS[sel], st=stateAt(sel,T), pop=$("pop"), w=people[sel].where;
   const c=k=>st.done.filter(s=>s.act.k===k).length;
+  const brks=BREAKS[day][sel].filter(b=>b.start<T).map(b=>({start:b.start,act:{a:{coffee:"☕ Սուրճի ընդմիջում",lunch:"🍽 Լանչ",smoke:"🚬 Դուրս եկավ ծխելու"}[b.type]}}));
+  const log=st.done.concat(brks).sort((a,b)=>a.start-b.start).slice(-7).reverse();
   pop.innerHTML=`<button class="x" aria-label="Փակել">×</button><h3>${p.n}</h3><div class="sub">Երեխան՝ ${p.c} · ${p.city}</div>
+  <div class="row"><span>Հիմա</span><span>${st.cur?"հավելվածում՝ "+st.cur.act.s:WHERE[w]}</span></div>
   <div class="row"><span>Այսօր հավելվածում</span><span>${dur(st.minutes)}</span></div>
-  <div class="row"><span>Հիմա</span><span>${st.cur?st.cur.act.s:"հավելվածում չէ"}</span></div>
   <div class="row"><span>Առաջադրանք և տնային</span><span>${c("task")}</span></div>
   <div class="row"><span>Պատասխան և գովեստ</span><span>${c("reply")+c("praise")}</span></div>
-  <div class="log">${st.done.slice(-6).reverse().map(s=>`${fmt(s.start)} · ${s.act.a}`).join("<br>")||"Այսօր դեռ չի բացել"}</div>`;
+  <div class="row"><span>Սեղանին</span><span>${p.items.map(x=>ITEM_NAMES[x]).join(", ")}</span></div>
+  <div class="log">${log.map(s=>`${fmt(s.start)} · ${s.act.a}`).join("<br>")||"Այսօր դեռ չի բացել"}</div>`;
   pop.querySelector(".x").onclick=()=>select(sel);
-  const box=$("scene").getBoundingClientRect(), k=box.width/1200;
+  const box=$("scene").getBoundingClientRect(), k=box.width/1440;
+  const m=(people[sel].pg.style.transform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px/)||[0,pos[sel].x,pos[sel].y]);
+  const x=+m[1], y=+m[2];
   let left=x*k+40, top=y*k-60;
   if(left+290>box.width) left=x*k-320;
-  pop.style.left=Math.max(8,left)+"px";pop.style.top=Math.max(8,Math.min(top,box.height-260))+"px";pop.style.display="block";
+  pop.style.left=Math.max(8,left)+"px";pop.style.top=Math.max(8,Math.min(top,box.height-280))+"px";pop.style.display="block";
 }
 
 /* ---------- Controls ---------- */
-$("days").innerHTML=DAYS.map(d=>`<button class="chip" type="button" data-d="${d.id}" aria-pressed="${d.id===day}">${d.label}</button>`).join("");
-$("days").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{day=b.dataset.d;$("days").querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===b));render()});
-$("t").oninput=e=>{T=+e.target.value;render()};
+function setLive(on){
+  live=on;$("live").setAttribute("aria-pressed",on);
+  if(on){const n=yerevanNow();day=TODAY;T=n.min;stopPlay();markDay();}
+}
+function markDay(){$("days").querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x.dataset.d===day))}
+function stopPlay(){if(timer){clearInterval(timer);timer=null}$("play").textContent="▶ Time-lapse"}
+$("days").innerHTML=DAYS.map(d=>`<button class="chip" type="button" data-d="${d.id}">${d.label}${d.id===TODAY?" · այսօր":""}</button>`).join("");
+$("days").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{day=b.dataset.d;if(day!==TODAY)setLive(false);else if(!timer)setLive(true);markDay();render()});
+$("live").onclick=()=>{setLive(true);render()};
+$("t").oninput=e=>{setLive(false);T=+e.target.value;render()};
 $("play").onclick=()=>{
-  if(timer){clearInterval(timer);timer=null;$("play").textContent="▶ Time-lapse";return}
-  if(T>=1375)T=420;$("play").textContent="❚❚ Կանգնեցնել";
-  timer=setInterval(()=>{T+=5;if(T>1380){T=1380;clearInterval(timer);timer=null;$("play").textContent="▶ Time-lapse"}render()},90);
+  if(timer){stopPlay();return}
+  setLive(false);if(T>=1375||T<420)T=420;$("play").textContent="❚❚ Կանգնեցնել";
+  timer=setInterval(()=>{T+=5;if(T>1380){T=1380;stopPlay()}render()},90);
 };
+setInterval(()=>{if(live){const n=yerevanNow();if(n.date!==TODAY){location.reload();return}T=n.min;render()}},15000);
 window.addEventListener("resize",()=>{if(sel>=0)renderPop()});
-render();
+markDay();render();
 </script>
 </body>
 </html>
