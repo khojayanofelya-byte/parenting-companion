@@ -1,4 +1,5 @@
 {
+ "totals": {"parents": 12, "total_minutes": 2123, "average_minutes_per_parent": 177, "most_minutes": "Լուսինե Գրիգորյան (280)", "least_minutes": "Վահե Ղազարյան (52)", "sessions": 97, "evening_sessions_after_17": 65, "evening_share_percent": 67, "top_screen_counts": {"Այսօր": 8, "Տնային": 2, "Քարտեզ": 1, "Պարգևներ": 1}},
  "note": "DEMO DATA: fictional parents, not real test results",
  "app": "Parenting Companion",
  "date": "2026-11-18",
