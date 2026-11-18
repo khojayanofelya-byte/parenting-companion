@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Child · Write homework</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+Armenian:wght@400;600&display=swap">
+<style>
+body{margin:0}
+a{color:#5B3FD9;text-decoration:none}a:hover{color:#16161D}
+button,textarea{font:inherit}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: #F6F6FA; color: #16161D; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Noto Sans Armenian', sans-serif; overflow: hidden">
+<header style="display: flex; align-items: center; gap: 4px; padding: 24px 12px 4px">
+<a href="ChildDay.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #16161D"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg></a>
+<div style="display: flex; flex-direction: column">
+<h1 style="margin: 0; font-size: 24px; font-weight: 600">Write today's homework</h1>
+<span style="font-size: 15px; color: #6E6E7A">+5 points when you write it</span>
+</div>
+</header>
+<main style="flex: 1; display: flex; flex-direction: column; gap: 16px; padding: 12px 20px 12px; overflow-y: auto; scrollbar-width: none">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 15px; font-weight: 600; color: #16161D">Subject</span>
+<div role="radiogroup" aria-label="Subject" style="display: flex; flex-wrap: wrap; gap: 8px">
+<button role="radio" aria-checked="{{ subj0On }}" style="{{ subj0St }}" onClick="{{ subj0Pick }}">Maths</button>
+<button role="radio" aria-checked="{{ subj1On }}" style="{{ subj1St }}" onClick="{{ subj1Pick }}">Armenian</button>
+<button role="radio" aria-checked="{{ subj2On }}" style="{{ subj2St }}" onClick="{{ subj2Pick }}">Russian</button>
+<button role="radio" aria-checked="{{ subj3On }}" style="{{ subj3St }}" onClick="{{ subj3Pick }}">English</button>
+<button role="radio" aria-checked="{{ subj4On }}" style="{{ subj4St }}" onClick="{{ subj4Pick }}">Other</button>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<label for="hw-text" style="font-size: 15px; font-weight: 600; color: #16161D">What to do</label>
+<textarea id="hw-text" rows="3" style="box-sizing: border-box; width: 100%; padding: 14px; border-radius: 16px; border: 2px solid #5B3FD9; background: #FFFFFF; color: #16161D; font-size: 17px; resize: none; outline: none">Exercises 12–14, page 38</textarea>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 15px; font-weight: 600; color: #16161D">For</span>
+<div role="radiogroup" aria-label="Due" style="display: flex; gap: 8px">
+<button role="radio" aria-checked="{{ when0On }}" style="{{ when0St }}" onClick="{{ when0Pick }}">Tomorrow</button>
+<button role="radio" aria-checked="{{ when1On }}" style="{{ when1St }}" onClick="{{ when1Pick }}">Wed</button>
+<button role="radio" aria-checked="{{ when2On }}" style="{{ when2St }}" onClick="{{ when2Pick }}">Thu</button>
+</div>
+</div>
+<button style="display: flex; align-items: center; justify-content: center; gap: 10px; height: 88px; border-radius: 20px; border: 2px dashed #C9C9D3; background: rgba(255,255,255,0.6); color: #16161D; font-size: 15px; font-weight: 600" onClick="{{ photoTap }}">
+<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+{{ photoLbl }}</button>
+<div role="note" style="display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 16px; background: #ECE8FD; color: #16161D; font-size: 15px; line-height: 1.4">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span>Mom, Dad and Grandma see it and can help.</span>
+</div>
+</main>
+<div style="padding: 12px 20px 28px">
+<a href="ChildDay.dc.html" style="display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 12px; background: #16161D; color: #FFFFFF; font-size: 17px; font-weight: 600; text-decoration: none">Save homework</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+_baseVals() {
+return { pickMath: () => {} };
+}
+_toast(msg) {
+clearTimeout(this._tt);
+this.setState({ toast: msg });
+this._tt = setTimeout(() => this.setState({ toast: '' }), 2800);
+}
+componentWillUnmount() { clearTimeout(this._tt); }
+renderVals() {
+const s = Object.assign({ subj: 0, when: 0, photo: false }, this.state || {});
+return Object.assign({}, this._baseVals(), {
+subj0St: (s.subj===0) ? "height: 44px; padding: 0 16px; border-radius: 20px; border: 0; background: #16161D; color: #FFFFFF; font-size: 15px; font-weight: 600" : "height: 44px; padding: 0 16px; border-radius: 20px; border: 0; background: #FFFFFF; color: #16161D; font-size: 15px",
+subj0On: String(s.subj===0),
+subj0Pick: () => { this.setState({subj: 0});  },
+subj1St: (s.subj===1) ? "height: 44px; padding: 0 16px; border-radius: 20px; border: 0; background: #16161D; color: #FFFFFF; font-size: 15px; font-weight: 600" : "height: 44px; padding: 0 16px; border-radius: 20px; border: 0; background: #FFFFFF; color: #16161D; font-size: 15px",
+subj1On: String(s.subj===1),
+subj1Pick: () => { this.setState({subj: 1});  },
+subj2St: (s.subj===2) ? "height: 44px; padding: 0 16px; border-radius: 20px; border: 0; background: #16161D; color: #FFFFFF; font-size: 15px; font-weight: 600" : "height: 44px; padding: 0 16px; border-radius: 20px; border: 0; background: #FFFFFF; color: #16161D; font-size: 15px",
+subj2On: String(s.subj===2),
+subj2Pick: () => { this.setState({subj: 2});  },
+subj3St: (s.subj===3) ? "height: 44px; padding: 0 16px; border-radius: 20px; border: 0; background: #16161D; color: #FFFFFF; font-size: 15px; font-weight: 600" : "height: 44px; padding: 0 16px; border-radius: 20px; border: 0; background: #FFFFFF; color: #16161D; font-size: 15px",
+subj3On: String(s.subj===3),
+subj3Pick: () => { this.setState({subj: 3});  },
+subj4St: (s.subj===4) ? "height: 44px; padding: 0 16px; border-radius: 20px; border: 0; background: #16161D; color: #FFFFFF; font-size: 15px; font-weight: 600" : "height: 44px; padding: 0 16px; border-radius: 20px; border: 0; background: #FFFFFF; color: #16161D; font-size: 15px",
+subj4On: String(s.subj===4),
+subj4Pick: () => { this.setState({subj: 4});  },
+when0St: (s.when===0) ? "flex: 1; height: 44px; border-radius: 12px; border: 0; background: #16161D; color: #FFFFFF; font-size: 15px; font-weight: 600" : "flex: 1; height: 44px; border-radius: 12px; border: 0; background: #FFFFFF; color: #16161D; font-size: 15px",
+when0On: String(s.when===0),
+when0Pick: () => { this.setState({when: 0});  },
+when1St: (s.when===1) ? "flex: 1; height: 44px; border-radius: 12px; border: 0; background: #16161D; color: #FFFFFF; font-size: 15px; font-weight: 600" : "flex: 1; height: 44px; border-radius: 12px; border: 0; background: #FFFFFF; color: #16161D; font-size: 15px",
+when1On: String(s.when===1),
+when1Pick: () => { this.setState({when: 1});  },
+when2St: (s.when===2) ? "flex: 1; height: 44px; border-radius: 12px; border: 0; background: #16161D; color: #FFFFFF; font-size: 15px; font-weight: 600" : "flex: 1; height: 44px; border-radius: 12px; border: 0; background: #FFFFFF; color: #16161D; font-size: 15px",
+when2On: String(s.when===2),
+when2Pick: () => { this.setState({when: 2});  },
+photoLbl: s.photo ? "Photo added ✓" : "Add a photo of the diary or board",
+photoTap: () => this.setState({photo: !s.photo})
+});
+}
+}
+</script>
+</body>
+</html>

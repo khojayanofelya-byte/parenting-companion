@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parenting Companion — Prototype</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+Armenian:wght@400;600&display=swap">
+<style>
+  :root{--bg:#F6F6FA;--ink:#16161D;--muted:#6E6E7A;--line:#ECECF2;--accent:#7C5CFA;--accent-ink:#5B3FD9;--accent-soft:#ECE8FD}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter','Noto Sans Armenian',-apple-system,BlinkMacSystemFont,sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 24px;display:flex;gap:48px;align-items:flex-start}
+  .info{flex:1;min-width:0}
+  h1{font-size:32px;line-height:38px;margin:0 0 8px;font-weight:600}
+  .lead{font-size:16px;line-height:24px;color:var(--muted);margin:0 0 28px;max-width:46ch}
+  h2{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:28px 0 10px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:460px}
+  a.btn{display:flex;flex-direction:column;gap:2px;padding:14px 16px;border-radius:16px;background:#fff;border:1px solid var(--line);color:var(--ink);text-decoration:none;cursor:pointer}
+  a.btn:hover,a.btn[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
+  a.btn b{font-size:15px;font-weight:600}
+  a.btn span{font-size:13px;color:var(--muted)}
+  .links{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:14px}
+  .links a{color:var(--accent-ink);font-weight:600;text-decoration:none}
+  .links a:hover{text-decoration:underline}
+  .note{font-size:13px;color:var(--muted);margin-top:28px;max-width:52ch;line-height:19px}
+  .phone{flex-shrink:0;width:414px;height:868px;border-radius:48px;background:var(--ink);padding:12px;box-shadow:0 24px 60px rgba(22,22,29,.18)}
+  .phone iframe{width:390px;height:844px;border:0;border-radius:36px;background:var(--bg);display:block}
+  @media (max-width:900px){.phone{display:none}.wrap{padding:28px 20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="info">
+    <h1>Parenting Companion</h1>
+    <p class="lead">Ընտանեկան օրվա պլանավորող ծնողների և 9–12 տարեկան երեխաների համար։ Կլիկվող պրոտոտիպ՝ 22 էկրան, հայերեն և անգլերեն։<br>A shared day planner for parents and their 9–12-year-old child. Clickable prototype, 22 screens, Armenian and English.</p>
+
+    <h2>Բացել պրոտոտիպը · Open the prototype</h2>
+    <div class="grid">
+      <a class="btn" href="Main-hy.dc.html" data-screen aria-current="true"><b>Ծնող</b><span>«Այսօր» · Հայերեն</span></a>
+      <a class="btn" href="ChildDay-hy.dc.html" data-screen><b>Երեխա</b><span>«Իմ օրը» · Հայերեն</span></a>
+      <a class="btn" href="Main.dc.html" data-screen><b>Parent</b><span>“Today” · English</span></a>
+      <a class="btn" href="ChildDay.dc.html" data-screen><b>Child</b><span>“My day” · English</span></a>
+    </div>
+
+    <h2>Նախագծի փաստաթղթեր · Project docs</h2>
+    <div class="links">
+      <a href="https://app.notion.com/p/40cac0d47edd81b5a44fc9d584c2fd28" target="_blank" rel="noopener">Notion project</a>
+      <a href="https://claude.ai/artifact/QG6Bn5W24RfVitz6h3ue9M" target="_blank" rel="noopener">Design system</a>
+      <a href="https://www.figma.com/design/7E7kyKLLw0tsLPNqR3Eorr" target="_blank" rel="noopener">References board</a>
+      <a href="https://claude.ai/artifact/5u6qmqgKAyz9LdgNkrkyYh" target="_blank" rel="noopener">Robi 3D</a>
+    </div>
+
+    <p class="note">Համակարգչով՝ էկրանը բացվում է աջ կողմի հեռախոսում։ Հեռախոսով՝ ամբողջ էկրանով։<br>On a computer the screen opens in the phone on the right; on a phone it opens full screen.</p>
+  </div>
+  <div class="phone" aria-label="Prototype preview"><iframe id="preview" src="Main-hy.dc.html" title="Prototype"></iframe></div>
+</div>
+<script>
+  const frame = document.getElementById('preview');
+  const wide = () => window.matchMedia('(min-width: 901px)').matches;
+  document.querySelectorAll('[data-screen]').forEach(a => {
+    a.addEventListener('click', e => {
+      if (!wide()) return;
+      e.preventDefault();
+      frame.src = a.getAttribute('href');
+      document.querySelectorAll('[data-screen]').forEach(b => b.removeAttribute('aria-current'));
+      a.setAttribute('aria-current', 'true');
+    });
+  });
+</script>
+</body>
+</html>
