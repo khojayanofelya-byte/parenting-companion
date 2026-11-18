@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parenting Companion — Ծնողների օֆիս</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+Armenian:wght@400;600;700&display=swap">
+<style>
+  :root{--bg:#F6F6FA;--card:#FFFFFF;--ink:#16161D;--muted:#6E6E7A;--line:#ECECF2;--accent:#7C5CFA;--accent-ink:#5B3FD9;--accent-soft:#ECE8FD;--ok:#3FB57A;--ok-soft:#E4F5EC;--warn:#F08A5D;--warn-soft:#FDEEE5;--sky:#3FA8D6}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter','Noto Sans Armenian',-apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1240px;margin:0 auto;padding:32px 24px 56px}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  h1{font-size:34px;line-height:40px;margin:4px 0 6px;font-weight:700}
+  .lead{font-size:16px;line-height:24px;color:var(--muted);margin:0}
+  .demo{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:4px 10px;border-radius:999px;background:var(--warn-soft);color:#9A4A22;font-size:12px;font-weight:600}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:22px 0 14px}
+  .chip{height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .chip.play{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .time{display:flex;align-items:center;gap:10px;margin-left:auto;font-size:13px;color:var(--muted)}
+  .time input{width:220px;accent-color:var(--accent)}
+  .clock{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);font-size:15px;min-width:44px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+  .stat{background:var(--card);border-radius:16px;padding:14px 16px;box-shadow:0 1px 2px rgba(22,22,29,.04)}
+  .stat b{display:block;font-size:24px;line-height:30px;font-variant-numeric:tabular-nums}
+  .stat span{font-size:13px;color:var(--muted)}
+  .scene{position:relative;background:var(--card);border-radius:24px;overflow:hidden;box-shadow:0 1px 2px rgba(22,22,29,.04)}
+  .scene svg{display:block;width:100%;height:auto}
+  .tag{position:absolute;left:16px;top:14px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.9);font:600 12px/1 ui-monospace,Menlo,Consolas,monospace;color:var(--ink)}
+  .desk{cursor:pointer}
+  .desk:focus{outline:none}
+  .desk:focus-visible .seat,.desk.sel .seat{stroke:var(--accent);stroke-width:3}
+  .glow{animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+  .pop{position:absolute;width:280px;background:var(--card);border-radius:16px;box-shadow:0 12px 32px rgba(22,22,29,.16);padding:14px 16px;font-size:13px;display:none;z-index:3}
+  .pop h3{margin:0;font-size:16px}
+  .pop .sub{color:var(--muted);margin:2px 0 10px}
+  .pop .row{display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid var(--line)}
+  .pop .row span:last-child{font-weight:600;font-variant-numeric:tabular-nums}
+  .pop .log{margin-top:8px;max-height:132px;overflow:auto;color:var(--muted);line-height:19px}
+  .pop .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:18px;cursor:pointer;color:var(--muted)}
+  .grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:14px}
+  .panel{background:var(--card);border-radius:20px;padding:16px 18px;box-shadow:0 1px 2px rgba(22,22,29,.04)}
+  .panel h2{font-size:17px;margin:0 0 10px}
+  .people{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .p{display:flex;gap:10px;align-items:center;padding:10px;border-radius:14px;border:1px solid var(--line);cursor:pointer;background:none;font:inherit;text-align:left;color:inherit}
+  .p:hover{border-color:var(--accent)}
+  .av{width:34px;height:34px;border-radius:17px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0;font-size:14px}
+  .p .n{font-size:14px;font-weight:600}
+  .p .m{font-size:12px;color:var(--muted)}
+  .p svg{margin-left:auto;flex-shrink:0}
+  .claude{font-size:15px;line-height:23px}
+  .claude p{margin:0 0 8px}
+  .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:17px}
+  .top a{color:var(--accent-ink);font-weight:600;text-decoration:none;font-size:14px}
+  @media (max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.people{grid-template-columns:1fr}.time{margin-left:0;width:100%}.time input{flex:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="./">← Պրոտոտիպ</a></div>
+  <div class="eyebrow" style="margin-top:14px">Usage tracker · Parenting Companion</div>
+  <h1>Ծնողների օֆիս</h1>
+  <p class="lead" id="lead">12 ծնող օրվա ընթացքում օգտագործում են հավելվածը։ Սեղմիր սեղանի վրա՝ մանրամասների համար։</p>
+  <span class="demo">● Demo տվյալներ · հորինված ծնողներ, ոչ իրական թեստի արդյունք</span>
+
+  <div class="bar" role="group" aria-label="Օր">
+    <div id="days" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    <button class="chip play" id="play" type="button">▶ Time-lapse</button>
+    <div class="time"><span>Ժամը</span><input id="t" type="range" min="420" max="1380" step="5" aria-label="Ժամ"><span class="clock" id="clock">--:--</span></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b id="sNow">0</b><span>հիմա հավելվածում</span></div>
+    <div class="stat"><b id="sAvg">0</b><span>միջինը մեկ ծնողին այսօր</span></div>
+    <div class="stat"><b id="sTasks">0</b><span>առաջադրանք և տնային ավելացվեց</span></div>
+    <div class="stat"><b id="sPraise">0</b><span>գովեստ և պատասխան երեխային</span></div>
+  </div>
+
+  <div class="scene" id="scene">
+    <svg id="svg" viewBox="0 0 1200 600" role="img" aria-label="Օֆիս՝ 12 ծնողներով"></svg>
+    <div class="tag" id="tag">Երևան · --:--</div>
+    <div class="pop" id="pop" role="dialog" aria-live="polite"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2>Ծնողներ · այսօր հավելվածում</h2>
+      <div class="people" id="people"></div>
+    </div>
+    <div class="panel">
+      <h2>Օրվա ամփոփում</h2>
+      <div class="claude" id="summary"></div>
+      <div class="note">Իրական տարբերակում այս ամփոփումը ամեն երեկո գրում է Claude-ը Make-ում՝ Google Sheets-ի տվյալներից, և ուղարկում email-ով։ Այստեղ այն հաշվվում է demo տվյալներից։</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- Demo data (fictional parents) ---------- */
+const PARENTS = [
+  {n:"Անի Մարգարյան", c:"Արամ, 10", city:"Երևան", col:"#7C5CFA", style:"busy"},
+  {n:"Դավիթ Հակոբյան", c:"Լիլիթ, 12", city:"Երևան", col:"#3FA8D6", style:"evening"},
+  {n:"Նարե Պետրոսյան", c:"Մանե, 9", city:"Գյումրի", col:"#F08A5D", style:"heavy"},
+  {n:"Արմեն Սարգսյան", c:"Տիգրան, 11", city:"Երևան", col:"#3FB57A", style:"light"},
+  {n:"Լուսինե Գրիգորյան", c:"Էրիկ, 10", city:"Վանաձոր", col:"#E0559A", style:"heavy"},
+  {n:"Գոհար Ավետիսյան", c:"Սոնա, 12", city:"Երևան", col:"#5B3FD9", style:"busy"},
+  {n:"Տիգրան Մկրտչյան", c:"Դավիթ, 9", city:"Աբովյան", col:"#2E8C8C", style:"evening"},
+  {n:"Մարիամ Հովհաննիսյան", c:"Անահիտ, 11", city:"Երևան", col:"#C7792B", style:"heavy"},
+  {n:"Վահե Ղազարյան", c:"Նարեկ, 10", city:"Գյումրի", col:"#4A6CF7", style:"light"},
+  {n:"Սիրանուշ Վարդանյան", c:"Էլեն, 9", city:"Երևան", col:"#9B59D0", style:"busy"},
+  {n:"Հայկ Կարապետյան", c:"Մարկ, 12", city:"Կապան", col:"#D0493F", style:"evening"},
+  {n:"Աննա Մելքոնյան", c:"Լևոն, 11", city:"Երևան", col:"#1F7A55", style:"heavy"}
+];
+const ACTIONS = [
+  {s:"Այսօր", a:"Ստուգեց երեխայի օրը", k:"check", w:5},
+  {s:"Նոր առաջադրանք", a:"Ավելացրեց առաջադրանք", k:"task", w:3},
+  {s:"Տնային", a:"Ավելացրեց տնային", k:"task", w:3},
+  {s:"Կանոններ", a:"Պատասխանեց +20 ր հարցմանը", k:"reply", w:2},
+  {s:"Պարգևներ", a:"Ուղարկեց գովեստ", k:"praise", w:2},
+  {s:"Քարտեզ", a:"Նայեց քարտեզը", k:"check", w:2},
+  {s:"Պլան", a:"Պլանավորեց շաբաթը", k:"plan", w:1},
+  {s:"Ներմուծում", a:"Ներմուծեց դասացուցակը", k:"plan", w:1},
+  {s:"Չեմ կարող", a:"Պատասխանեց «Չեմ կարող»-ին", k:"reply", w:1}
+];
+const DAYS = [
+  {id:"2026-11-12", label:"Հնգ, 12 նոյ."},
+  {id:"2026-11-13", label:"Ուրբ, 13 նոյ."},
+  {id:"2026-11-16", label:"Երկ, 16 նոյ."},
+  {id:"2026-11-17", label:"Երք, 17 նոյ."},
+  {id:"2026-11-18", label:"Չրք, 18 նոյ."}
+];
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+function pick(r){const tot=ACTIONS.reduce((a,b)=>a+b.w,0);let x=r()*tot;for(const a of ACTIONS){if((x-=a.w)<0)return a}return ACTIONS[0]}
+const WINDOWS = {
+  busy:[[480,540],[720,780],[1080,1260]],
+  evening:[[1020,1320]],
+  heavy:[[450,540],[780,900],[1020,1290]],
+  light:[[510,560],[1140,1230]]
+};
+// sessions[day][parent] = [{start,end,act}]
+const DATA = {};
+DAYS.forEach((d,di)=>{
+  DATA[d.id] = PARENTS.map((p,pi)=>{
+    const r = rng((di+1)*1000+pi*37+7);
+    const out=[];
+    for(const [a,b] of WINDOWS[p.style]){
+      let t=a+Math.floor(r()*20);
+      while(t<b-10){
+        const len=8+Math.floor(r()*(p.style==="heavy"?34:24));
+        out.push({start:t,end:Math.min(t+len,b),act:pick(r)});
+        t+=len+6+Math.floor(r()*28);
+      }
+    }
+    return out;
+  });
+});
+
+/* ---------- Helpers ---------- */
+const $=id=>document.getElementById(id);
+const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+":"+String(m%60).padStart(2,'0');
+const dur=m=>{const h=Math.floor(m/60),mm=Math.round(m%60);return h?`${h} ժ ${mm} ր`:`${mm} ր`};
+const initials=n=>n.split(" ").map(x=>x[0]).join("");
+let day=DAYS[DAYS.length-1].id, T=20*60+30, sel=-1, timer=null;
+
+/* ---------- Scene ---------- */
+const NS="http://www.w3.org/2000/svg";
+const el=(t,a={},p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const svg=$("svg");
+const sky=el("linearGradient",{id:"sky",x1:0,y1:0,x2:0,y2:1},el("defs",{},svg));
+const sk1=el("stop",{offset:"0"},sky), sk2=el("stop",{offset:"1"},sky);
+// wall + floor
+const wall=el("rect",{x:0,y:0,width:1200,height:230,fill:"#EEEAFB"},svg);
+el("rect",{x:0,y:230,width:1200,height:370,fill:"#F3F1F7"},svg);
+for(let i=0;i<12;i++) el("line",{x1:i*110-60,y1:600,x2:i*100+40,y2:230,stroke:"#E6E3EE","stroke-width":2},svg);
+// windows
+const wins=[];
+[120,430,740].forEach(x=>{
+  el("rect",{x:x-6,y:34,width:232,height:148,rx:12,fill:"#FFFFFF"},svg);
+  wins.push(el("rect",{x,y:40,width:220,height:136,rx:8,fill:"url(#sky)"},svg));
+  el("line",{x1:x+110,y1:40,x2:x+110,y2:176,stroke:"#FFFFFF","stroke-width":5},svg);
+});
+const sun=el("circle",{r:16,fill:"#FFD66B"},svg);
+// sign + coffee corner
+el("rect",{x:990,y:40,width:170,height:52,rx:12,fill:"#16161D"},svg);
+const signTxt=el("text",{x:1075,y:72,"text-anchor":"middle",fill:"#fff","font-size":15,"font-weight":700},svg);signTxt.textContent="Parenting Companion";
+el("rect",{x:1010,y:150,width:150,height:70,rx:10,fill:"#D9D3F5"},svg);
+const cof=el("text",{x:1085,y:192,"text-anchor":"middle",fill:"#5B3FD9","font-size":14,"font-weight":600},svg);cof.textContent="☕ Սուրճ";
+const coffeeGroup=el("g",{},svg);
+
+// desks
+const deskG=[];
+const COLS=4, pos=[];
+for(let r=0;r<3;r++)for(let c=0;c<COLS;c++){
+  const s=0.82+r*0.1, x=150+c*235+(r%2?40:0), y=268+r*112;
+  pos.push({x,y,s});
+}
+PARENTS.forEach((p,i)=>{
+  const {x,y,s}=pos[i];
+  const g=el("g",{class:"desk",tabindex:0,role:"button","aria-label":p.n,transform:`translate(${x} ${y}) scale(${s})`},svg);
+  // chair
+  el("rect",{x:-22,y:-6,width:44,height:46,rx:12,fill:"#D8D5E3",class:"seat",stroke:"none"},g);
+  // person
+  const person=el("g",{},g);
+  el("rect",{x:-20,y:-8,width:40,height:44,rx:16,fill:p.col},person);
+  el("circle",{cx:0,cy:-26,r:17,fill:"#F2D3BD"},person);
+  el("path",{d:"M-17 -30 a17 17 0 0 1 34 0 q-17 -9 -34 0z",fill:"#3A2E2A"},person);
+  const ini=el("text",{x:0,y:20,"text-anchor":"middle",fill:"#fff","font-size":12,"font-weight":700},person);ini.textContent=initials(p.n);
+  // desk
+  el("rect",{x:-62,y:30,width:124,height:18,rx:6,fill:"#FFFFFF",stroke:"#E3E0EC"},g);
+  el("rect",{x:-56,y:48,width:8,height:30,fill:"#D8D5E3"},g);el("rect",{x:48,y:48,width:8,height:30,fill:"#D8D5E3"},g);
+  // phone
+  const glow=el("rect",{x:20,y:4,width:30,height:30,rx:9,fill:"#7C5CFA",opacity:0},g);
+  const phone=el("rect",{x:27,y:8,width:16,height:26,rx:4,fill:"#16161D"},g);
+  const scr=el("rect",{x:29,y:11,width:12,height:19,rx:2,fill:"#3A3A46"},g);
+  // name
+  const nm=el("text",{x:0,y:96,"text-anchor":"middle",fill:"#16161D","font-size":13,"font-weight":600},g);nm.textContent=p.n.split(" ")[0];
+  // bubble
+  const bub=el("g",{opacity:0},g);
+  const bb=el("rect",{x:-80,y:-92,width:160,height:34,rx:12,fill:"#FFFFFF",stroke:"#ECECF2"},bub);
+  el("path",{d:"M-6 -58 l6 9 l6 -9z",fill:"#FFFFFF"},bub);
+  const bt=el("text",{x:0,y:-70,"text-anchor":"middle",fill:"#16161D","font-size":12,"font-weight":600},bub);
+  g.addEventListener("click",()=>select(i));
+  g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(i)}});
+  deskG.push({g,person,glow,scr,bub,bt,bb});
+});
+
+/* ---------- State ---------- */
+function stateAt(pi,t){
+  const ss=DATA[day][pi];
+  const cur=ss.find(s=>t>=s.start&&t<s.end);
+  const done=ss.filter(s=>s.start<t);
+  const minutes=done.reduce((a,s)=>a+Math.min(s.end,t)-s.start,0);
+  const last=done[done.length-1];
+  return {cur,done,minutes,last};
+}
+function skyColors(t){
+  const h=t/60;
+  if(h<7.5||h>=18.5) return ["#1E2246","#3B3F7A",true];
+  if(h<9) return ["#F7C6A3","#BFD9F2",false];
+  if(h>=17) return ["#F2A27A","#8E8BD6",false];
+  return ["#8CCDF0","#DDF0FB",false];
+}
+function render(){
+  $("clock").textContent=fmt(T);$("t").value=T;
+  const [a,b,night]=skyColors(T);sk1.setAttribute("stop-color",a);sk2.setAttribute("stop-color",b);
+  wall.setAttribute("fill",night?"#DCD8EE":"#EEEAFB");
+  const prog=Math.min(Math.max((T-420)/(1140-420),0),1);
+  sun.setAttribute("cx",130+prog*820);sun.setAttribute("cy",150-Math.sin(prog*Math.PI)*95);
+  sun.setAttribute("fill",night?"#E8E6F7":"#FFD66B");
+  $("tag").textContent=`Երևան ${fmt(T)} · ${night?"երեկո":"օր"}`;
+  let now=0,tasks=0,praise=0,totalMin=0;
+  coffeeGroup.innerHTML="";let coffeeN=0;
+  PARENTS.forEach((p,i)=>{
+    const st=stateAt(i,T), d=deskG[i];
+    totalMin+=st.minutes;
+    st.done.forEach(s=>{if(s.act.k==="task")tasks++;if(s.act.k==="praise"||s.act.k==="reply")praise++;});
+    const away = !st.cur && (T<480||T>1320||(T>=780&&T<840&&i%3===0));
+    d.person.setAttribute("opacity",away?0:1);
+    if(away&&coffeeN<4&&T>=780&&T<840){const c=el("circle",{cx:1040+coffeeN*30,cy:250,r:11,fill:p.col},coffeeGroup);coffeeN++;}
+    if(st.cur){now++;d.glow.setAttribute("opacity",1);d.glow.classList.add("glow");d.scr.setAttribute("fill","#ECE8FD");
+      d.bt.textContent=st.cur.act.a;const w=Math.max(120,st.cur.act.a.length*7.2+24);d.bb.setAttribute("width",w);d.bb.setAttribute("x",-w/2);d.bub.setAttribute("opacity",1);}
+    else{d.glow.setAttribute("opacity",0);d.glow.classList.remove("glow");d.scr.setAttribute("fill","#3A3A46");d.bub.setAttribute("opacity",0);}
+    d.g.classList.toggle("sel",i===sel);
+  });
+  $("sNow").textContent=`${now} / ${PARENTS.length}`;
+  $("sAvg").textContent=dur(totalMin/PARENTS.length);
+  $("sTasks").textContent=tasks;$("sPraise").textContent=praise;
+  renderPeople();renderSummary();if(sel>=0)renderPop();
+}
+function weekMinutes(pi){return DAYS.map(d=>DATA[d.id][pi].reduce((a,s)=>a+s.end-s.start,0))}
+function spark(vals,col){
+  const w=70,h=24,max=Math.max(...vals,1);
+  const pts=vals.map((v,i)=>`${(i/(vals.length-1))*w},${h-2-(v/max)*(h-4)}`).join(" ");
+  return `<svg width="${w}" height="${h}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function renderPeople(){
+  $("people").innerHTML=PARENTS.map((p,i)=>{
+    const st=stateAt(i,T);
+    return `<button class="p" type="button" data-i="${i}"><span class="av" style="background:${p.col}">${initials(p.n)}</span><span><span class="n">${p.n}</span><br><span class="m">${p.c} · ${p.city} · ${dur(st.minutes)}${st.cur?" · <b style='color:#5B3FD9'>հիմա</b>":""}</span></span>${spark(weekMinutes(i),p.col)}</button>`;
+  }).join("");
+  $("people").querySelectorAll(".p").forEach(b=>b.onclick=()=>{select(+b.dataset.i);$("scene").scrollIntoView({behavior:"smooth",block:"center"})});
+}
+function renderSummary(){
+  const end=1380, mins=PARENTS.map((p,i)=>DATA[day][i].reduce((a,s)=>a+s.end-s.start,0));
+  const avg=mins.reduce((a,b)=>a+b,0)/mins.length;
+  const top=mins.indexOf(Math.max(...mins)), low=mins.indexOf(Math.min(...mins));
+  const counts={};DATA[day].flat().forEach(s=>counts[s.act.s]=(counts[s.act.s]||0)+1);
+  const topScreen=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+  const evening=DATA[day].flat().filter(s=>s.start>=1020).length/DATA[day].flat().length;
+  const regions=PARENTS.filter(p=>p.city!=="Երևան").length;
+  $("summary").innerHTML=`<p><b>Միջինը ${dur(avg)}</b> մեկ ծնողին. ամենաշատը՝ ${PARENTS[top].n.split(" ")[0]} (${dur(mins[top])}), ամենաքիչը՝ ${PARENTS[low].n.split(" ")[0]} (${dur(mins[low])})։</p>
+  <p>Ամենաշատ բացված էկրանը՝ <b>«${topScreen}»</b>։ Սեսիաների ${Math.round(evening*100)}%-ը երեկոյան է՝ 17:00-ից հետո, երբ երեխաները տանն են։</p>
+  <p>Հաջորդ քայլ՝ ստուգել ${PARENTS[low].n.split(" ")[0]}-ին. նա քիչ է բացում, միգուցե ծանուցումները չեն աշխատում։ ${regions} ծնող մարզերից է։</p>`;
+}
+function select(i){sel=(sel===i?-1:i);render();if(sel<0)$("pop").style.display="none"}
+function renderPop(){
+  const p=PARENTS[sel], st=stateAt(sel,T), pop=$("pop"), {x,y}=pos[sel];
+  const c=k=>st.done.filter(s=>s.act.k===k).length;
+  pop.innerHTML=`<button class="x" aria-label="Փակել">×</button><h3>${p.n}</h3><div class="sub">Երեխան՝ ${p.c} · ${p.city}</div>
+  <div class="row"><span>Այսօր հավելվածում</span><span>${dur(st.minutes)}</span></div>
+  <div class="row"><span>Հիմա</span><span>${st.cur?st.cur.act.s:"հավելվածում չէ"}</span></div>
+  <div class="row"><span>Առաջադրանք և տնային</span><span>${c("task")}</span></div>
+  <div class="row"><span>Պատասխան և գովեստ</span><span>${c("reply")+c("praise")}</span></div>
+  <div class="log">${st.done.slice(-6).reverse().map(s=>`${fmt(s.start)} · ${s.act.a}`).join("<br>")||"Այսօր դեռ չի բացել"}</div>`;
+  pop.querySelector(".x").onclick=()=>select(sel);
+  const box=$("scene").getBoundingClientRect(), k=box.width/1200;
+  let left=x*k+40, top=y*k-60;
+  if(left+290>box.width) left=x*k-320;
+  pop.style.left=Math.max(8,left)+"px";pop.style.top=Math.max(8,Math.min(top,box.height-260))+"px";pop.style.display="block";
+}
+
+/* ---------- Controls ---------- */
+$("days").innerHTML=DAYS.map(d=>`<button class="chip" type="button" data-d="${d.id}" aria-pressed="${d.id===day}">${d.label}</button>`).join("");
+$("days").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{day=b.dataset.d;$("days").querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===b));render()});
+$("t").oninput=e=>{T=+e.target.value;render()};
+$("play").onclick=()=>{
+  if(timer){clearInterval(timer);timer=null;$("play").textContent="▶ Time-lapse";return}
+  if(T>=1375)T=420;$("play").textContent="❚❚ Կանգնեցնել";
+  timer=setInterval(()=>{T+=5;if(T>1380){T=1380;clearInterval(timer);timer=null;$("play").textContent="▶ Time-lapse"}render()},90);
+};
+window.addEventListener("resize",()=>{if(sel>=0)renderPop()});
+render();
+</script>
+</body>
+</html>
